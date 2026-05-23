@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EnergiXpert - Intelligent Solar & Battery Calculator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .calculator-container {
+            background-color: #1e293b;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 500px;
+            border: 1px solid #334155;
+            box-sizing: border-box;
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #10b981;
+            font-size: 26px;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        p.subtitle {
+            color: #94a3b8;
+            text-align: center;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            color: #f8fafc;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #475569;
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border 0.3s;
+        }
+
+        input[type="number"]:focus {
+            border-color: #10b981;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background-color: #10b981;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: #059669;
+        }
+
+        .results {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #334155;
+            display: none;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 15px;
+        }
+
+        .result-item span:last-child {
+            font-weight: bold;
+            color: #10b981;
+        }
+
+        .affiliate-box {
+            margin-top: 20px;
+            background-color: #0f172a;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+        }
+
+        .affiliate-title {
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: #f59e0b;
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-shop {
+            display: block;
+            text-align: center;
+            background-color: #2563eb;
+            color: white;
+            text-decoration: none;
+            padding: 11px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            transition: background 0.3s;
+        }
+
+        .btn-shop:hover {
+            background-color: #1d4ed8;
+        }
+
+        .btn-shop.battery {
+            background-color: #7c3aed;
+        }
+
+        .btn-shop.battery:hover {
+            background-color: #6d28d9;
+        }
+        
+        .footer-credit {
+            text-align: center;
+            font-size: 11px;
+            color: #475569;
+            margin-top: 20px;
+        }
+        .footer-credit a {
+            color: #64748b;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="calculator-container">
+    <h2>EnergiXpert</h2>
+    <p class="subtitle">Intelligent software for solar energy independence sizing</p>
+    
+    <div class="form-group">
+        <label for="bill">Average Monthly Electricity Bill in Euro (€):</label>
+        <input type="number" id="bill" placeholder="e.g. 250" min="1">
+    </div>
+    
+    <button onclick="calculateSystem()">Generate Specs & Find Best Prices</button>
+    
+    <div class="results" id="resultsBox">
+        <div class="result-item">
+            <span>Estimated Daily Consumption:</span>
+            <span id="dailyKwh">0 kWh</span>
+        </div>
+        <div class="result-item">
+            <span>Recommended Hybrid Inverter:</span>
+            <span id="inverterKw">0 kW</span>
+        </div>
+        <div class="result-item">
+            <span>Recommended Battery Storage:</span>
+            <span id="batteryKwh">0 kWh</span>
+        </div>
+        
+        <div class="affiliate-box">
+            <div class="affiliate-title">🛒 BEST EUROPEAN HARDWARE OFFERS (HIGH-TICKET)</div>
+            <a href="#" id="linkInverter" target="_blank" class="btn-shop">View Hybrid Inverters on Amazon.de</a>
+            <a href="#" id="linkBattery" target="_blank" class="btn-shop battery">View Compatible LiFePO4 Batteries</a>
+        </div>
+    </div>
+    
+    <div class="footer-credit">
+        Powered by <a href="https://lifeweaverlifeweaver-hash.github.io/L-Weaver-Studio.github.io/" target="_blank">L-Weaver Studio</a>
+    </div>
+</div>
+
+<script>
+    function calculateSystem() {
+        var billInput = document.getElementById('bill');
+        var bill = parseFloat(billInput.value);
+        
+        if (!bill || bill <= 0) {
+            alert("Please enter a valid electricity bill amount.");
+            return;
+        }
+
+        // Базова линия за средна цена на тока в ЕС (€0.30 за kWh)
+        var kwhPrice = 0.30;
+        var monthlyKwh = bill / kwhPrice;
+        var dailyKwh = monthlyKwh / 30;
+        
+        // Инженерна логика за изчисляване на хардуерните спецификации
+        var requiredInverter = (dailyKwh * 0.65);
+        if (requiredInverter < 5.0) {
+            requiredInverter = 5.0;
+        }
+        requiredInverter = requiredInverter.toFixed(1);
+        var requiredBattery = (dailyKwh * 0.5).toFixed(1);
+
+        // Показване на резултатите в интерфейса
+        document.getElementById('dailyKwh').innerText = dailyKwh.toFixed(2) + " kWh";
+        document.getElementById('inverterKw').innerText = requiredInverter + " kW";
+        document.getElementById('batteryKwh').innerText = requiredBattery + " kWh";
+
+        // Твоят официален Amazon афилиейт ID код
+        var myAffiliateId = "lweaver-21"; 
+        var baseAmazonUrl = "https://www.amazon.de/s?k=";
+        
+        var inverterSearch = encodeURIComponent("Hybrid Inverter " + requiredInverter + "kW Deye Fronius");
+        var batterySearch = encodeURIComponent("LiFePO4 Battery " + requiredBattery + "kWh 48V");
+
+        document.getElementById('linkInverter').href = baseAmazonUrl + inverterSearch + "&tag=" + myAffiliateId;
+        document.getElementById('linkBattery').href = baseAmazonUrl + batterySearch + "&tag=" + myAffiliateId;
+
+        // Отваряне на резултатите
+        document.getElementById('resultsBox').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
